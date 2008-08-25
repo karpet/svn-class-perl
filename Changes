@@ -1,0 +1,47 @@
+Revision history for SVN-Class
+
+0.01    27 Sept 2007
+        First version, released on an unsuspecting world.
+
+0.02    16 Oct 2007
+        Added missing .pm files to MANIFEST (did I just ignore make distcheck?)
+        t/01-svn.t only runs if svn is found in PATH
+
+0.03    16 Oct 2007
+        Added missing Path::Class::File::Stat to dependency list.
+
+
+0.04    17 Oct 2007
+        Prefix all svn_run() calls with LANG=C to standardize svn output.
+        Thanks to uwe.voelker@gmx.de for the fix.
+
+0.05    18 Oct 2007
+        **dev release only** -- turned on debugging in tests
+
+0.06    17 Jan 2008
+        * documented all the accessors in SVN::Class
+        * turned off debugging in tests
+
+0.07    13 Feb 2008
+        * added SVN::Class::Info and parent info() method
+        * added outstr() method
+        * added SVN::Class::Repos
+
+0.08_01 4 July 2008
+        * **developer release only** -- trying to track down 50% fail rate in CPANTS.
+        * no idea why tests fail after 20 tests in t/01-svn.t
+          so switched to File::Temp for that test, along with using local
+          repos for author test.
+        * turned on debugging for tests.
+
+0.08_02 7 July 2008
+        * another debugging release
+
+0.08_03 10 July 2008
+        * dumb error after all. Needed to SKIP the right number of tests when svn bin not found.
+
+0.08    22 July 2008
+        * no code changes, just an official release now that 0.07 test snafu is resolved.
+
+
+
