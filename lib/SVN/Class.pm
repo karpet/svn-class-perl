@@ -275,13 +275,14 @@ sub commit {
 
     # croak if failure but set error() and error_code()
     # first in case wrapped in eval().
-    my $self = shift;
+    my $self    = shift;
     my $message = shift or croak "commit message required";
+    my $opts    = shift || [];
 
     # must escape any literal '" in the message
     $message =~ s,(['"]),\\$1,g;
 
-    my $ret = $self->svn_run( 'commit', ["-m \"$message\""] );
+    my $ret = $self->svn_run( 'commit', [ "-m \"$message\"", @$opts ] );
 
     # $ret is empty string on success. that's odd.
     if ( defined( $self->{stdout}->[0] )
@@ -304,14 +305,14 @@ sub status {
 
     if ( $self->is_dir ) {
 
-        # check only first arg to see if it matches self
+        # find the arg that matches $self
         if ( defined $self->stdout->[0] ) {
-            if ( $self->stdout->[0] =~ m/^(\S)\s+$self$/ ) {
-                return $1;
+            for my $line ( @{ $self->stdout } ) {
+                if ( $line =~ m/^(\S)\s+$self$/ ) {
+                    return $1;
+                }
             }
-            else {
-                return 0;
-            }
+            return 0;
         }
     }
 
@@ -372,7 +373,7 @@ object or 0 on failure.
 
 sub info {
     my $self = shift;
-    return 0 unless $self->svn_run('info', @_);
+    return 0 unless $self->svn_run( 'info', @_ );
     return SVN::Class::Info->new( $self->stdout );
 }
 
