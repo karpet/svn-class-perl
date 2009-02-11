@@ -64,3 +64,7 @@ Revision history for SVN-Class
           Rose::Object via Rose::URI. One less dependency, plus Rose::Object now has an XS
           option if Class::XSAccessor is installed.
 
+0.13_03 xxx
+        * Class::XSAccessor now triggers Pod::Coverage warnings if methods are documented.
+          Added docs in SVN::Class::Info.
+
