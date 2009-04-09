@@ -24,7 +24,7 @@ unless ( IPC::Cmd->can_capture_buffer ) {
 # might be messing with STDOUT or STDIN
 my $REAL_STDIN  = *STDIN;
 my $REAL_STDOUT = *STDOUT;
-if ( $ENV{ALIAS_STDOUT} ) {
+if ( $ENV{SVN_CLASS_ALIAS_STDOUT} ) {
     open $REAL_STDIN,  "<&=" . fileno(*STDIN);
     open $REAL_STDOUT, ">>&=" . fileno(*STDOUT);
 }
