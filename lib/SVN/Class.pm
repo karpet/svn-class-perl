@@ -174,7 +174,7 @@ sub svn_run {
         # does not result in bad values in $? and $!
         # http://www.perlmonks.org/?node_id=197500
         # useful for running under Catalyst (e.g.)
-        #local $SIG{CHLD} = '';
+        local $SIG{CHLD} = '';
 
         (@out) = run( command => $command, verbose => $self->verbose );
 
