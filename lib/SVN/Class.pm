@@ -22,8 +22,12 @@ unless ( IPC::Cmd->can_capture_buffer ) {
 # this trick cribbed from mst's Catalyst::Controller::WrapCGI
 # we alias STDIN and STDOUT since Catalyst (and presumaly other code)
 # might be messing with STDOUT or STDIN
-open my $REAL_STDIN,  "<&=" . fileno(*STDIN);
-open my $REAL_STDOUT, ">>&=" . fileno(*STDOUT);
+my $REAL_STDIN  = *STDIN;
+my $REAL_STDOUT = *STDOUT;
+if ( $ENV{ALIAS_STDOUT} ) {
+    open $REAL_STDIN,  "<&=" . fileno(*STDIN);
+    open $REAL_STDOUT, ">>&=" . fileno(*STDOUT);
+}
 
 our @EXPORT    = qw( svn_file svn_dir );
 our @EXPORT_OK = qw( svn_file svn_dir );
@@ -43,13 +47,11 @@ SVN::Class - manipulate Subversion workspaces with Perl objects
  print {$fh} "hello world\n";
  $fh->close;
  $file->add;
- if ($file->modified)
- {
+ if ($file->modified) {
     my $rev = $file->commit('the file changed');
     print "$file was committed with revision $rev\n";
  }
- else
- {
+ else {
     croak "$file was not committed: " . $file->errstr;
  }
  
