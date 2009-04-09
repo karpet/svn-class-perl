@@ -22,8 +22,8 @@ unless ( IPC::Cmd->can_capture_buffer ) {
 # this trick cribbed from mst's Catalyst::Controller::WrapCGI
 # we alias STDIN and STDOUT since Catalyst (and presumaly other code)
 # might be messing with STDOUT or STDIN
-open( *REAL_STDIN,  "<&=" . fileno(*STDIN) );
-open( *REAL_STDOUT, ">>&=" . fileno(*STDOUT) );
+open my $REAL_STDIN,  "<&=" . fileno(*STDIN);
+open my $REAL_STDOUT, ">>&=" . fileno(*STDOUT);
 
 our @EXPORT    = qw( svn_file svn_dir );
 our @EXPORT_OK = qw( svn_file svn_dir );
@@ -165,16 +165,16 @@ sub svn_run {
     my @out;
 
     {
-        local *STDIN  = \*REAL_STDIN;   # restore the real ones so the filenos
-        local *STDOUT = \*REAL_STDOUT;  # are 0 and 1 for the env setup
+        local *STDIN  = $REAL_STDIN;    # restore the real ones so the filenos
+        local *STDOUT = $REAL_STDOUT;   # are 0 and 1 for the env setup
 
-        my $old = select(REAL_STDOUT);  # in case somebody just calls 'print'
+        my $old = select($REAL_STDOUT); # in case somebody just calls 'print'
 
         # Use local signal handler so global handler
         # does not result in bad values in $? and $!
         # http://www.perlmonks.org/?node_id=197500
         # useful for running under Catalyst (e.g.)
-        local $SIG{CHLD} = '';
+        #local $SIG{CHLD} = '';
 
         (@out) = run( command => $command, verbose => $self->verbose );
 
