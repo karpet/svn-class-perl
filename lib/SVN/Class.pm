@@ -10,6 +10,7 @@ use IPC::Cmd qw( can_run run );
 use SVN::Class::File;
 use SVN::Class::Dir;
 use SVN::Class::Info;
+use Text::ParseWords;
 
 $ENV{LC_ALL} = 'C';    # we expect our responses in ASCII
 
@@ -23,7 +24,7 @@ unless ( IPC::Cmd->can_capture_buffer ) {
 
 # IPC::Run fails tests because we use built-in shell commands
 # not found in PATH
-#$IPC::Cmd::USE_IPC_RUN = 1;
+$IPC::Cmd::USE_IPC_RUN = 1;
 
 # this trick cribbed from mst's Catalyst::Controller::WrapCGI
 # we alias STDIN and STDOUT since Catalyst (and presumaly other code)
@@ -38,13 +39,15 @@ if ( $ENV{SVN_CLASS_ALIAS_STDOUT} ) {
 }
 
 sub _debug_stdin_fh {
-    warn "     stdin fileno = " . CORE::fileno(*STDIN);
-    warn "real_stdin fileno = " . CORE::fileno($REAL_STDIN);
+
+    #warn "     stdin fileno = " . CORE::fileno(*STDIN);
+    #warn "real_stdin fileno = " . CORE::fileno($REAL_STDIN);
 }
 
 sub _debug_stdout_fh {
-    warn "     stdout fileno = " . CORE::fileno(*STDOUT);
-    warn "real_stdout fileno = " . CORE::fileno($REAL_STDOUT);
+
+    #warn "     stdout fileno = " . CORE::fileno(*STDOUT);
+    #warn "real_stdout fileno = " . CORE::fileno($REAL_STDOUT);
 }
 
 our @EXPORT    = qw( svn_file svn_dir );
@@ -176,11 +179,15 @@ output is ASCII only.
 =cut
 
 sub svn_run {
-    my $self    = shift;
-    my $cmd     = shift or croak "svn command required";
-    my $opts    = shift || [];
-    my $file    = shift || "$self";
-    my $command = join( ' ', $self->svn, $cmd, @$opts, $file );
+    my $self = shift;
+    my $cmd  = shift or croak "svn command required";
+    my $opts = shift || [];
+    my $file = shift || "$self";
+
+    # since $opts may contain whitespace, must pass command as array ref
+    # to IPC::Run
+    my $command
+        = [ $self->svn, $cmd, shellwords( join( ' ', @$opts ) ), $file ];
 
     my @out;
 
@@ -231,6 +238,7 @@ sub svn_run {
     $self->error_code($error_code);
 
     if ( $self->debug || $ENV{PERL_DEBUG} ) {
+        carp "command: $command";
         carp Data::Dump::dump \@out;
         $self->dump;
         carp "success = $success";

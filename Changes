@@ -70,4 +70,5 @@ Revision history for SVN-Class
         * made stdout/stdin aliasing conditional based on SVN_CLASS_ALIAS_STDOUT env var.
           default is now *off* so that things work as you would expect, and the hack
           of aliasing them now used only when explicitly asked for.
+        * added Text::ParseWords to Makefile deps so IPC::Run works.
 
