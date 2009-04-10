@@ -47,6 +47,8 @@ SKIP: {
 
     #  SVN::Class::File
     ok( my $file = svn_file( $work, 'test1' ), "new svn_file" );    # 1
+    $file->_debug_stdin_fh;
+    $file->_debug_stdout_fh;
     $file->debug(1) if $debug;
     ok( my $fh = $file->open('>>'), "filehandle created" );
     ok( print( {$fh} "hello world\n" ), "hello world" );
@@ -54,6 +56,7 @@ SKIP: {
     ok( $file->add,                        "$file scheduled for commit" );
     ok( $file->modified,                   "$file status == modified" );   # 6
     ok( $file->commit('the file changed'), "$file committed" );
+    #diag("error: " . $file->errstr . " : $!") if $file->error_code;
     ok( my $log = $file->log, "$file has a log" );
     is( $file->outstr, join( "\n", @$log, "" ), "outstr" );
 
@@ -63,7 +66,9 @@ SKIP: {
     ok( -d $dir ? 1 : $dir->mkpath, "$dir mkpath" );    # 11
     ok( $dir->add, "$dir scheduled for commit" );
     is( $dir->status, 'A', "dir status is schedule for Add" );
+    #diag(join("", `ls -l $work`));
     ok( $dir->commit('new dir'), "$dir committed" );
+    #diag("error: " . $dir->errstr . " : $!") if $dir->error_code;
     is( $dir->status, 0, "dir status is 0 since it has not changed" );
 
     # SVN::Class::Info

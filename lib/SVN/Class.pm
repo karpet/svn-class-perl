@@ -11,6 +11,8 @@ use SVN::Class::File;
 use SVN::Class::Dir;
 use SVN::Class::Info;
 
+$ENV{LC_ALL} = 'C';    # we expect our responses in ASCII
+
 #$IPC::Cmd::DEBUG   = 1;
 #$IPC::Cmd::VERBOSE = 1;
 
@@ -19,14 +21,30 @@ unless ( IPC::Cmd->can_capture_buffer ) {
         . "Do you have IPC::Run installed?";
 }
 
+# IPC::Run fails tests because we use built-in shell commands
+# not found in PATH
+#$IPC::Cmd::USE_IPC_RUN = 1;
+
 # this trick cribbed from mst's Catalyst::Controller::WrapCGI
 # we alias STDIN and STDOUT since Catalyst (and presumaly other code)
 # might be messing with STDOUT or STDIN
 my $REAL_STDIN  = *STDIN;
 my $REAL_STDOUT = *STDOUT;
+my $REAL_STDERR = *STDERR;
 if ( $ENV{SVN_CLASS_ALIAS_STDOUT} ) {
     open $REAL_STDIN,  "<&=" . fileno(*STDIN);
     open $REAL_STDOUT, ">>&=" . fileno(*STDOUT);
+    open $REAL_STDERR, ">>&=" . fileno(*STDERR);
+}
+
+sub _debug_stdin_fh {
+    warn "     stdin fileno = " . fileno(*STDIN);
+    warn "real_stdin fileno = " . fileno($REAL_STDIN);
+}
+
+sub _debug_stdout_fh {
+    warn "     stdout fileno = " . fileno(*STDOUT);
+    warn "real_stdout fileno = " . fileno($REAL_STDOUT);
 }
 
 our @EXPORT    = qw( svn_file svn_dir );
@@ -152,7 +170,7 @@ This method is used internally by all the Subversion commands.
 
 B<NOTE:> In order to standardize the output of Subversion commands into
 a locale that is easily parse-able by other methods that call svn_run()
-internally, all commands are prefixed with C<LC_ALL=C> to make sure
+internally, all commands are run with C<LC_ALL=C> to make sure
 output is ASCII only.
 
 =cut
@@ -162,21 +180,28 @@ sub svn_run {
     my $cmd     = shift or croak "svn command required";
     my $opts    = shift || [];
     my $file    = shift || "$self";
-    my $command = join( ' ', 'LC_ALL=C', $self->svn, $cmd, @$opts, $file );
+    my $command = join( ' ', $self->svn, $cmd, @$opts, $file );
 
     my @out;
+
+    $self->_debug_stdin_fh;
+    $self->_debug_stdout_fh;
 
     {
         local *STDIN  = $REAL_STDIN;    # restore the real ones so the filenos
         local *STDOUT = $REAL_STDOUT;   # are 0 and 1 for the env setup
+        local *STDERR = $REAL_STDERR;
 
-        my $old = select($REAL_STDOUT); # in case somebody just calls 'print'
+        my $old = select($REAL_STDOUT);  # in case somebody just calls 'print'
 
         # Use local signal handler so global handler
         # does not result in bad values in $? and $!
         # http://www.perlmonks.org/?node_id=197500
         # useful for running under Catalyst (e.g.)
         local $SIG{CHLD} = '';
+
+        $file->_debug_stdin_fh;
+        $file->_debug_stdout_fh;
 
         (@out) = run( command => $command, verbose => $self->verbose );
 
