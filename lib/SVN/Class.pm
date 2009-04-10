@@ -32,19 +32,19 @@ my $REAL_STDIN  = *STDIN;
 my $REAL_STDOUT = *STDOUT;
 my $REAL_STDERR = *STDERR;
 if ( $ENV{SVN_CLASS_ALIAS_STDOUT} ) {
-    open $REAL_STDIN,  "<&=" . fileno(*STDIN);
-    open $REAL_STDOUT, ">>&=" . fileno(*STDOUT);
-    open $REAL_STDERR, ">>&=" . fileno(*STDERR);
+    open $REAL_STDIN,  "<&=" . CORE::fileno(*STDIN);
+    open $REAL_STDOUT, ">>&=" . CORE::fileno(*STDOUT);
+    open $REAL_STDERR, ">>&=" . CORE::fileno(*STDERR);
 }
 
 sub _debug_stdin_fh {
-    warn "     stdin fileno = " . fileno(*STDIN);
-    warn "real_stdin fileno = " . fileno($REAL_STDIN);
+    warn "     stdin fileno = " . CORE::fileno(*STDIN);
+    warn "real_stdin fileno = " . CORE::fileno($REAL_STDIN);
 }
 
 sub _debug_stdout_fh {
-    warn "     stdout fileno = " . fileno(*STDOUT);
-    warn "real_stdout fileno = " . fileno($REAL_STDOUT);
+    warn "     stdout fileno = " . CORE::fileno(*STDOUT);
+    warn "real_stdout fileno = " . CORE::fileno($REAL_STDOUT);
 }
 
 our @EXPORT    = qw( svn_file svn_dir );
@@ -200,8 +200,8 @@ sub svn_run {
         # useful for running under Catalyst (e.g.)
         local $SIG{CHLD} = '';
 
-        $file->_debug_stdin_fh;
-        $file->_debug_stdout_fh;
+        $self->_debug_stdin_fh;
+        $self->_debug_stdout_fh;
 
         (@out) = run( command => $command, verbose => $self->verbose );
 
