@@ -1,5 +1,8 @@
 Revision history for SVN-Class
 
+0.18 24 Sept 2014
+ - add support for svn 1.8 working copy 'Relative URL'
+
 0.17 8 Nov 2011
  - add support for svn 1.7 working copy root path via
    https://rt.cpan.org/Ticket/Display.html?id=72218
